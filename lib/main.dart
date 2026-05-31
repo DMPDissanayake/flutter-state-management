@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:test_bloc/bloc/counter/counter_bloc.dart';
+import 'package:test_bloc/injection.dart';
 
 void main() {
+  setupInjection();
   runApp(const MyApp());
+}
+
+void setupInjection() {
+  registerSingleton<CounterBloc>(CounterBloc());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: BlocProvider(
-        create: (context) => CounterBloc(),
-        child: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: BlocProvider<CounterBloc>.value(
+          value: injection<CounterBloc>(),
+          child: MyHomePage(title: 'Flutter Demo Home Page'),
+        ),
       ),
     );
   }
@@ -31,15 +45,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  //MyBloc myBloc = MyBloc();
-  //CounterBloc counterBloc = CounterBloc();
-  late CounterBloc counterBloc;
-
-  @override
-  void initState() {
-    counterBloc = BlocProvider.of<CounterBloc>(context);
-    super.initState();
-  }
+  final counterBloc = injection<CounterBloc>();
 
   @override
   Widget build(BuildContext context) {
@@ -48,31 +54,28 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            BlocBuilder<CounterBloc, CounterState>(
-              builder: (context, state) {
-                if (state is CounterIncounterState) {
-                  _counter = state.value;
-                  return Text(
-                    '${state.value}',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  );
-                } else if (state is CounterDecrementState) {
-                  _counter = state.value;
-                  return Text(
-                    '${state.value}',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  );
-                } else {
-                  return Container();
-                }
-              },
-            ),
-          ],
+      body: BlocListener<CounterBloc, CounterState>(
+        listener: (context, state) {
+          if (state is CounterIncounterState) {
+            _counter = state.value;
+            setState(() {});
+          } else if (state is CounterDecrementState) {
+            _counter = state.value;
+            setState(() {});
+          }
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('You have pushed the button this many times:'),
+              SizedBox(height: 10.h),
+              Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(
@@ -86,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
             tooltip: 'Increment',
             child: const Icon(Icons.add),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           FloatingActionButton(
             heroTag: 'decrement_btn',
             onPressed: () {
