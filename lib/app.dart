@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:test_bloc/providers/repository_inheritend.dart';
-import 'package:test_bloc/repository/task_repository.dart';
-import 'package:test_bloc/views/home_view.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,16 +10,13 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-      child: RepositoryInheritend(
-        repository: TaskRepository(),
-        child: MaterialApp(
-          title: 'Flutter Inheritend',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          home: HomeView(),
+      child: MaterialApp(
+        title: 'Flutter Inheritend',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
         ),
+        home: HomeView(),
       ),
     );
   }
